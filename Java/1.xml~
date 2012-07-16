@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<device><number>7890</number><name>light1</name><address>00:00:00:01</address></device> 
+curl \
+  -i \
+  -X POST \
+  -H 'Content-Type: application/xml' \
+  -d '<device><number>7890</number><name>light1</name><address>00:00:00:01</address></device> ' \
+  http://localhost:3000/devices/
+  
+  
+  curl \
+  -i \
+  -X POST \
+  -H 'Content-Type: application/json' \
+  -d '{"device":{ "number":"70", "name":"light1", "address":"00:00:40:01"}}' \
+   http://localhost:3000/devices/

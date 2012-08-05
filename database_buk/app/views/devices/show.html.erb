@@ -1,0 +1,20 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Var name:</b>
+  <%= @device.var_name %>
+</p>
+
+<p>
+  <b>Address:</b>
+  <%= @device.address %>
+</p>
+
+<p>
+  <b>Current state:</b>
+  <%= @device.current_state %>
+</p>
+
+
+<%= link_to 'Edit', edit_device_path(@device) %> |
+<%= link_to 'Back', devices_path %>

@@ -18,7 +18,7 @@ class DevicesControllerTest < ActionController::TestCase
 
   test "should create device" do
     assert_difference('Device.count') do
-      post :create, device: { address: @device.address, name: @device.name, number: @device.number }
+      post :create, device: { address: @device.address, var_name: @device.var_name }
     end
 
     assert_redirected_to device_path(assigns(:device))
@@ -35,7 +35,7 @@ class DevicesControllerTest < ActionController::TestCase
   end
 
   test "should update device" do
-    put :update, id: @device, device: { address: @device.address, name: @device.name, number: @device.number }
+    put :update, id: @device, device: { address: @device.address, var_name: @device.var_name }
     assert_redirected_to device_path(assigns(:device))
   end
 

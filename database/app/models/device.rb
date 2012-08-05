@@ -1,3 +1,3 @@
 class Device < ActiveRecord::Base
-  attr_accessible :address, :name, :number
+  attr_accessible :address, :var_name
 end

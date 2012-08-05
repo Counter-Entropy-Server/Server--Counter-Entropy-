@@ -1,0 +1,27 @@
+<h1>Listing logs</h1>
+
+<table>
+  <tr>
+    <th>Address</th>
+    <th>State</th>
+    <th>Time</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @logs.each do |log| %>
+  <tr>
+    <td><%= log.address %></td>
+    <td><%= log.state %></td>
+    <td><%= log.time %></td>
+    <td><%= link_to 'Show', log %></td>
+    <td><%= link_to 'Edit', edit_log_path(log) %></td>
+    <td><%= link_to 'Destroy', log, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Log', new_log_path %>

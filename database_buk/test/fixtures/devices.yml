@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  var_name: MyString
+  address: MyString
+  current_state: MyString
+
+two:
+  var_name: MyString
+  address: MyString
+  current_state: MyString

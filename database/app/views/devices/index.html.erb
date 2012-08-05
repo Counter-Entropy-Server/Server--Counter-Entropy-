@@ -2,8 +2,7 @@
 
 <table>
   <tr>
-    <th>Number</th>
-    <th>Name</th>
+    <th>Var name</th>
     <th>Address</th>
     <th></th>
     <th></th>
@@ -12,8 +11,7 @@
 
 <% @devices.each do |device| %>
   <tr>
-    <td><%= device.number %></td>
-    <td><%= device.name %></td>
+    <td><%= device.var_name %></td>
     <td><%= device.address %></td>
     <td><%= link_to 'Show', device %></td>
     <td><%= link_to 'Edit', edit_device_path(device) %></td>

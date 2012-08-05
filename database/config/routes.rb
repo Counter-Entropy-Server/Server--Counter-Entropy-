@@ -1,10 +1,19 @@
 Database::Application.routes.draw do
-  resources :tests
+  resources :logs
 
+  resources :devices do
+     collection do
+       get 'setDeviceStateByName'
+       get 'setDeviceStateByAddress'
+       get 'getDeviceByName'
+       get 'getDeviceByAddress'
+       get 'getRangeByAddress'
+       get 'getRangeByName'
+     end
+  end
+     
   resources :devices
-  
-  resources :ApiController
-  resources :api  
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
@@ -62,3 +71,4 @@ Database::Application.routes.draw do
   # Note: This route will make all actions in every controller accessible via GET requests.
   # match ':controller(/:action(/:id))(.:format)'
 end
+

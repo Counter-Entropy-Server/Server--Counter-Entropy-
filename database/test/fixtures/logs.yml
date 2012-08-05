@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  address: MyString
+  state: MyString
+  time: 2012-08-05 20:48:16
+
+two:
+  address: MyString
+  state: MyString
+  time: 2012-08-05 20:48:16

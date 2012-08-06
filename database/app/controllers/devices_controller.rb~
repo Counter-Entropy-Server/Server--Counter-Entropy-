@@ -15,22 +15,27 @@ class DevicesController < ApplicationController
 #http://localhost:3000/devices/setDeviceStateByName?name=light&state=0
 def setDeviceStateByName
     @device = Device.find_by_var_name(params[:name])
+    t = Time.new
+    values = t.to_a
+    @time = Time.utc(*values)
     @log = Log.create(:address => @device[:address],
                       :state => params[:state],
-                      :time => Time.now)
+                      :time => @time)
     
-    #@newlog = @log.createLog("{'address':'1','state':'1','time':'01/10/2012'}")
     #@device[:state] = '0'
     #@device.update_attributes(:current_state => params[:state])
     #@newdevice = Device.new(@device)
     render json: @log
 end
-#http://localhost:3000/devices/setDeviceStateByAddress?address=00:00:00:00&state=0
+#http://localhost:3000/devices/setDeviceStateByAddress?address=00&state=0
 def setDeviceStateByAddress
     @device = Device.find_by_address(params[:address])
+    t = Time.new
+    values = t.to_a
+    @time = Time.utc(*values)
     @log = Log.create(:address => @device[:address],
                       :state => params[:state],
-                      :time => Time.now)
+                      :time => @time)
     #@device[:state] = '0'
     #@device.update_attributes([:current_state] => params[:state])
     #@newdevice = Device.new(@device)
@@ -40,16 +45,16 @@ end
 #http://localhost:3000/devices/getDeviceByName?name=door
 def getDeviceByName
     @device = Device.find_by_var_name(params[:name])	
-    @log = Log.find_by_address(@device[:address])
-    render json: @log.last
+    @logs = Log.find_all_by_address(@device[:address],:order => :time)
+    render json: @logs.last
 end
-#http://localhost:3000/devices/getDeviceByName?address=00:00:00:00
+#http://localhost:3000/devices/getDeviceByName?address=00
 def getDeviceByAddress
     @device = Device.find_by_address(params[:address])	
-    @log = Log.find_by_address(@device[:address])
-    render json: @log.last
+    @logs = Log.find_all_by_address(@device[:address],:order => :time)
+    render json: @logs.last
 end
-#http://localhost:3000/devices/getRangeByName?name=door&start_time=2012-08-05 18:57:02&end_time=2012-08-05 22:41:02
+#http://localhost:3000/devices/getRangeByName?name=light&start_time=2012-08-05%2022:53:02&end_time=2012-08-05%2023:55:02
 def getRangeByName
     @device = Device.find_by_var_name(params[:name])	
     @logs = Log.find(:all, :conditions => ['address LIKE ? AND time between ? AND ?',
@@ -58,7 +63,7 @@ def getRangeByName
                                            params[:end_time]])
     render json: @logs
 end
-#http://localhost:3000/devices/getRangeByName?address=00:00:00:00&start_time=2012-08-05 18:57:02&end_time=2012-08-05 22:41:02
+#http://localhost:3000/devices/getRangeByName?address=00&start_time=2012-08-05 18:57:02&end_time=2012-08-05 22:41:02
 def getRangeByAddress
     @device = Device.find_by_address(params[:address])
     @logs = Log.find(:all, :conditions => ['address LIKE ? AND time between ? AND ?',
@@ -106,6 +111,12 @@ end
 
     respond_to do |format|
       if @device.save
+	t = Time.new
+	values = t.to_a
+	@time = Time.utc(*values)
+	Log.create(:address => @device[:address],
+                      :state => 0'',
+                      :time => @time)
         format.html { redirect_to @device, notice: 'Device was successfully created.' }
         format.json { render json: @device, status: :created, location: @device }
       else

@@ -1,4 +1,4 @@
- 
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,54 +8,20 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
+
 import java.util.Enumeration;
 import java.lang.Object;
+import java.net.URLEncoder;
 import java.lang.String;
 
 public class SendRequest {
 
-	public void getAllRequest() 
-{
- 
-	  try {
- 
-		URL url = new URL("http://localhost:3000/devices.json");
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-		conn.setRequestMethod("GET");
-		conn.setRequestProperty("Accept", "application/json");
- 
-		if (conn.getResponseCode() != 200) {
-			throw new RuntimeException("Failed : HTTP error code : "
-					+ conn.getResponseCode());
-		}
- 
-		BufferedReader br = new BufferedReader(new InputStreamReader(
-			(conn.getInputStream())));
- 
-		String output;
-		System.out.println("Output from Server .... \n");
-		while ((output = br.readLine()) != null) {
-			System.out.println(output);
-		}
- 
-		conn.disconnect();
- 
-	  } catch (MalformedURLException e) {
- 
-		e.printStackTrace();
- 
-	  } catch (IOException e) {
- 
-		e.printStackTrace();
- 
-	  }
- 
-	}
-
-    public void sendPostRequest(String data) {
+    public static String sendPostRequest(String data) {
         
         //Build parameter string
-        
+        String res = "";
         try {
             
             // Send the request
@@ -83,30 +49,28 @@ public class SendRequest {
 	  String output;
 	  System.out.println("Output from Server .... \n");
 	  while ((output = br.readLine()) != null) {
-		  System.out.println(output);	
+		 res=res+output;	
 	  }
   
 	  conn.disconnect();
- 
-    } catch (MalformedURLException e) {
- 
-	  e.printStackTrace();
- 
+	  
+    } catch (RuntimeException e) {
+	  return "RuntimeException: "+e;
+    }
+      catch (MalformedURLException e) {
+	  return res;
     } catch (IOException e) {
- 
-		e.printStackTrace();
- 
-	 }
- 
-	}
+	  return res;
+    }
+ return res;
+}
 
     /**
      * Starts the program
      *
      * @param args the command line arguments
      */
-    public static String sendHashTable(Hashtable device) 	
-    {  
+    public static String sendHashTable(Hashtable device){  
 	
 	Enumeration en = device.keys();
 	String result = "{\"device\":{";
@@ -123,18 +87,63 @@ public class SendRequest {
 	return result;
   
     }
+    
+
+    public static String sendGetRequest(String data) {
+        //Build parameter string
+    String res = "";
+        try {
+            
+            // Send the request
+            String urlString = "http://localhost:3000/devices"+data;
+	    URLEncoder.encode(urlString, "UTF-8");
+	    URL url = new URL(urlString);
+	    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+	    
+	    // Read the response
+	    
+	    BufferedReader in = new BufferedReader(
+	    new InputStreamReader(urlConnection.getInputStream()));
+	    String line ="";
+	    while ((line = in.readLine()) != null){
+	     res = res+line;
+	    }
+	    in.close(); 
+ 
+	  } 
+	  catch (RuntimeException e) {
+	      return "RuntimeException: "+e;
+	  }
+	  catch (MalformedURLException e) 
+	  {
+	      return res;
+	  } catch (IOException e) {
+ 
+	      return res;
+	  }
+      return res;
+}
+
     public static void main(String[] args) 
     {
 
 
 	Hashtable<String,String> device = new Hashtable<String,String>();
-	device.put("number",  "1220");
-	device.put("name",  "light2");
-	device.put("address",  "00:00:40:22");
+	device.put("var_name",  "light7");
+	device.put("address",  "00:00:40:25");
 	String str =  sendHashTable(device);
-	System.out.println(str); 
-	new SendRequest().sendPostRequest(str);
-	//new SendRequest().sendPostRequest("{\"key\":\"name\",\"val\":\"22\"}");
-	//new SendRequest().getAllRequest() ;
+	
+	String res = sendPostRequest(str);
+	 
+	//String res = sendGetRequest("/getDeviceByName?name=light");
+	System.out.println(res);
+
+	//sendGetRequest("/setDeviceStateByName?name=light&state=0");
+	//sendGetRequest("/setDeviceStateByAddress?address=00&state=0");
+	//sendGetRequest("/getDeviceByName?name=light");
+	//sendGetRequest("/getDeviceByAddress?address=11");
+	//sendGetRequest("/getRangeByName?name=light&start_time=2012-08-05 22:53:02&end_time=2012-08-05 23:55:02");
+	//sendGetRequest("/getRangeByName?address=11&start_time=2012-08-05 18:57:02&end_time=2012-08-05 22:41:02");
+	//sendGetRequest(".json");
  }
 }

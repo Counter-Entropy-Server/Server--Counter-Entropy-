@@ -62,31 +62,39 @@ public class DITest {
 
     TCPMasterConnection con = null;
 
+    //Read slave every slaveReadPeriod
+    int slaveReadPeriod = 500;
+    
     //Slave network address
     InetAddress addr = null;
     
     //Slave network port
-    int port = Modbus.DEFAULT_PORT;
+    int port = Modbus.DEFAULT_PORT; // port number on WAGO usually 502
+    
+    //Path to read house variables
+    String houseVariablesExcelFilePath = null;
 
     try {
 
         //1. Setup the parameters
-        if (args.length < 1) {
+        if (args.length < 3) {
             printUsage();
             System.exit(1);
         } else {
             try {
-            String astr = args[0];
-            int idx = astr.indexOf(':');
-            if(idx > 0) {
-                port = Integer.parseInt(astr.substring(idx+1)); // port number on WAGO usually 502
-                astr = astr.substring(0,idx);
-            }
-            addr = InetAddress.getByName(astr); // ip-address of WAGO 
+                houseVariablesExcelFilePath = args[2];
+                slaveReadPeriod = Integer.parseInt(args[1]);
+                String astr = args[0];
+                int idx = astr.indexOf(':');
+                if(idx > 0) {
+                    port = Integer.parseInt(astr.substring(idx+1)); 
+                    astr = astr.substring(0,idx);
+                }
+                addr = InetAddress.getByName(astr); // ip-address of WAGO 
             } catch (Exception ex) {
             ex.printStackTrace();
-            printUsage();
-            System.exit(1);
+                printUsage();
+                System.exit(1);
             }
         }
 
@@ -99,33 +107,33 @@ public class DITest {
 
         //3. Process xls file and get house variables
         HashMap houseVariables;
-        houseVariables = getHouseVariables();
+        houseVariables = getHouseVariables(houseVariablesExcelFilePath);
         
         //4. Instantiate database communication object
         DBComm db = new DBComm(); //(can send the server ip address from command line?)
         //fill devices table in database
         db.FillDevices(houseVariables);
                
-        //4. Instantiate slave reader object
+        //5. Instantiate slave reader object
         SlaveReader r = new SlaveReader(con,houseVariables);
 
-         //5. Instantiate slave writer object
+        //6. Instantiate slave writer object
         SlaverWriter w = new SlaverWriter(con,houseVariables);
         
         //w.Write("window3_requested_position",10);
         //w.Write("light1",1);
         
-        //6. Open network sockets to communicate with other systems
+        //7. Open network sockets to communicate with other systems
         
         
-        //5. Start timer to read from slave
-        Timer timer = new Timer("Read slave time (5000ms)");
+        //8. Start timer to read from slave
+        Timer timer = new Timer("Read slave period "+slaveReadPeriod);
 
         ReadSlaveTimerCall t = new ReadSlaveTimerCall(r,houseVariables,db);
 
-        timer.schedule(t, 0, 5000); // 5000ms (input from command line?)
+        timer.schedule(t, 0, slaveReadPeriod); 
 
-        //7. Close the connection
+        //Close the connection
         //con.close();
 
     } catch (Exception ex) {
@@ -137,14 +145,14 @@ public class DITest {
     System.out.println("");
   }
 
-  private static HashMap getHouseVariables() {
+  private static HashMap getHouseVariables(String path) {
     
     HashMap variables;
       try
       {
         //read xls file into HashMap
         ReadExcel reader = new ReadExcel();
-        reader.setInputFile("/Users/nur/NetBeansProjects/ModbusTCPMasterSlave/120801_SlaveMasterRegistersMapping.xls");
+        reader.setInputFile(path);
         variables = reader.read();
         
         return variables;

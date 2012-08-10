@@ -60,6 +60,9 @@ public class DITest {
     
   public static void main(String[] args) {
 
+    //Server-Client protocol  
+    ScoketsCommProtocol protocol;
+      
     TCPMasterConnection con = null;
 
     //Read slave every slaveReadPeriod
@@ -69,9 +72,12 @@ public class DITest {
     InetAddress addr = null;
     
     //Slave network port
-    int port = Modbus.DEFAULT_PORT; // port number on WAGO usually 502
+    int modbusPort = Modbus.DEFAULT_PORT; // port number on WAGO usually 502
     
-    //Path to read house variables
+    //Sockets port
+    int socketPort = 4444;
+    
+    //Path to read house variables xls file
     String houseVariablesExcelFilePath = null;
 
     try {
@@ -87,7 +93,7 @@ public class DITest {
                 String astr = args[0];
                 int idx = astr.indexOf(':');
                 if(idx > 0) {
-                    port = Integer.parseInt(astr.substring(idx+1)); 
+                    modbusPort = Integer.parseInt(astr.substring(idx+1)); 
                     astr = astr.substring(0,idx);
                 }
                 addr = InetAddress.getByName(astr); // ip-address of WAGO 
@@ -100,7 +106,7 @@ public class DITest {
 
         //2. Open the connection
         con = new TCPMasterConnection(addr);
-        con.setPort(port);
+        con.setPort(modbusPort);
         con.connect();
 
         if (Modbus.debug) System.out.println("Connected to " + addr.toString() + ":" + con.getPort());
@@ -118,18 +124,18 @@ public class DITest {
         SlaveReader r = new SlaveReader(con,houseVariables);
 
         //6. Instantiate slave writer object
-        SlaverWriter w = new SlaverWriter(con,houseVariables);
-        
-        //w.Write("window3_requested_position",10);
-        //w.Write("light1",1);
+        SlaveWriter w = new SlaveWriter(con,houseVariables);
         
         //7. Open network sockets to communicate with other systems
-        
+        protocol = ScoketsCommProtocol.getInstance();
+        ServerSocketComm socket = new ServerSocketComm(socketPort, protocol);
+        (new Thread(socket)).start();
+        System.out.println("Socket opened");
         
         //8. Start timer to read from slave
         Timer timer = new Timer("Read slave period "+slaveReadPeriod);
 
-        ReadSlaveTimerCall t = new ReadSlaveTimerCall(r,houseVariables,db);
+        ReadSlaveTimerCall t = new ReadSlaveTimerCall(r,w,houseVariables,db,protocol);
 
         timer.schedule(t, 0, slaveReadPeriod); 
 
@@ -173,7 +179,8 @@ class ReadSlaveTimerCall extends TimerTask { //Implements the run() method calle
     //flag to log all variables whether changed from previous reading or not
     boolean forceLog; 
     
-    //referance to slave reader 
+    //referance to slave reader and writer
+    SlaveWriter writer;
     SlaveReader reader;
     
     //referance to database
@@ -181,14 +188,25 @@ class ReadSlaveTimerCall extends TimerTask { //Implements the run() method calle
     
     //house variables
     HashMap houseVariables;
+    HashMap clientVariables;
     HouseVariable v;
+    
+    //variables to notify clients about 
+    HouseVariable [] variablesWithNewValues;
     
     String dbRequest;
     
-    public ReadSlaveTimerCall(SlaveReader r, HashMap variables, DBComm db){
+    //get clients data
+    ScoketsCommProtocol protocol;
+    
+    int variablesToNotifyClientsCount = 0;
+    
+    public ReadSlaveTimerCall(SlaveReader r, SlaveWriter w, HashMap variables, DBComm db, ScoketsCommProtocol protocol){
         reader = r;
+        writer = w;
         houseVariables = variables;
         database = db;
+        this.protocol = protocol;
     }
             
     //Called by timer
@@ -206,12 +224,27 @@ class ReadSlaveTimerCall extends TimerTask { //Implements the run() method calle
         }
         
         // Stop timer (for testing purpose)
-        this.cancel();
+        //this.cancel();
+        
+        //Get clients data
+        clientVariables = protocol.getvariablesFromClients();
+        
+        //Iterate over all new variables values from clients to update houseVariables and write
+        Iterator it1 = clientVariables.entrySet().iterator();
+        while (it1.hasNext()) {
+            Map.Entry pairs = (Map.Entry)it1.next();
+            v = (HouseVariable) houseVariables.get((String)pairs.getKey());
+            
+            if (v.value != Integer.parseInt((String)pairs.getValue())){ //&& writable?
+                v.value = Integer.parseInt((String)pairs.getValue());
+                writer.Write(v.name,v.value);
+            }
+        }        
         
         //Iterate over all houseVariables to read
-        Iterator it = houseVariables.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pairs = (Map.Entry)it.next();
+        Iterator it2 = houseVariables.entrySet().iterator();
+        while (it2.hasNext()) {
+            Map.Entry pairs = (Map.Entry)it2.next();
             v = (HouseVariable)pairs.getValue();
             
             if (!v.readable) //only readable variables
@@ -233,14 +266,25 @@ class ReadSlaveTimerCall extends TimerTask { //Implements the run() method calle
                 database.sendGetRequest(dbRequest);
                                 
                 if (v.updated){
-                 
                     //notify other systems
+                    if (variablesWithNewValues == null)
+                        variablesWithNewValues = new HouseVariable [70]; 
+                    variablesWithNewValues[variablesToNotifyClientsCount] = v;
+                    variablesToNotifyClientsCount++;
+                    
                 }   
                 
                 v.updated = false;
             }
             
         }
+        
+        if (variablesToNotifyClientsCount > 0){
+            if (protocol.notifyClients(variablesWithNewValues,variablesToNotifyClientsCount)){
+            variablesToNotifyClientsCount =0;
+            }     
+        }
+        
     }
 }
 

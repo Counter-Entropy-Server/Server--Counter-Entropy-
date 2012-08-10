@@ -18,14 +18,14 @@ import net.wimpi.modbus.procimg.SimpleRegister;
  *
  * @author nur
  */
-public class SlaverWriter {
+public class SlaveWriter {
     
     private TCPMasterConnection con = null;
     private ModbusTCPTransaction trans = null;
     
     private HashMap houseVariables;
  
-    public SlaverWriter (TCPMasterConnection connection, HashMap vars)
+    public SlaveWriter (TCPMasterConnection connection, HashMap vars)
     {
         houseVariables = vars;
         con = connection;

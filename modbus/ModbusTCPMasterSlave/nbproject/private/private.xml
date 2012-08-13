@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/1"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/1">
+        <file>file:/Users/nur/Desktop/Counter%20Entropy/github/Server--Counter-Entropy-/modbus/ModbusTCPMasterSlave/src/net/wimpi/modbus/cmd/DITest.java</file>
+        <file>file:/Users/nur/Desktop/Counter%20Entropy/github/Server--Counter-Entropy-/modbus/ModbusTCPMasterSlave/src/net/wimpi/modbus/util/ScoketsCommProtocol.java</file>
+        <file>file:/Users/nur/Desktop/Counter%20Entropy/github/Server--Counter-Entropy-/modbus/ModbusTCPMasterSlave/src/net/wimpi/modbus/util/ReadSlaveTimerCall.java</file>
+        <file>file:/Users/nur/Desktop/Counter%20Entropy/github/Server--Counter-Entropy-/modbus/ModbusTCPMasterSlave/src/net/wimpi/modbus/util/ServerSocketComm.java</file>
+        <file>file:/Users/nur/Desktop/Counter%20Entropy/github/Server--Counter-Entropy-/modbus/ModbusTCPMasterSlave/src/net/wimpi/modbus/util/ServerSocketThread.java</file>
+        <file>file:/Users/nur/Desktop/Counter%20Entropy/github/Server--Counter-Entropy-/modbus/ModbusTCPMasterSlave/src/net/wimpi/modbus/cmd/CEHouse.java</file>
+        <file>file:/Users/nur/Desktop/Counter%20Entropy/github/Server--Counter-Entropy-/modbus/ModbusTCPMasterSlave/src/net/wimpi/modbus/util/DBComm.java</file>
+        <file>file:/Users/nur/Desktop/Counter%20Entropy/github/Server--Counter-Entropy-/modbus/ModbusTCPMasterSlave/src/net/wimpi/modbus/util/CEModbusTCPMaster.java</file>
+        <file>file:/Users/nur/Desktop/Counter%20Entropy/github/Server--Counter-Entropy-/modbus/ModbusTCPMasterSlave/src/net/wimpi/modbus/util/SlaveWriter.java</file>
+        <file>file:/Users/nur/Desktop/Counter%20Entropy/github/Server--Counter-Entropy-/modbus/ModbusTCPMasterSlave/src/net/wimpi/modbus/util/ReadExcel.java</file>
+        <file>file:/Users/nur/Desktop/Counter%20Entropy/github/Server--Counter-Entropy-/modbus/ModbusTCPMasterSlave/src/net/wimpi/modbus/util/SlaveReader.java</file>
+        <file>file:/Users/nur/Desktop/Counter%20Entropy/github/Server--Counter-Entropy-/modbus/ModbusTCPMasterSlave/src/net/wimpi/modbus/util/HouseVariable.java</file>
+    </open-files>
 </project-private>

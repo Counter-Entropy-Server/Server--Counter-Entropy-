@@ -70,16 +70,77 @@ public class TCPSlaveTest {
       spi = new SimpleProcessImage();
 
       // Coils (the modbus address of the first bit is writter in the LSB)
+      /*
+      spi.addDigitalIn(new SimpleDigitalIn(false));
+      spi.addDigitalIn(new SimpleDigitalIn(false));
+      spi.addDigitalIn(new SimpleDigitalIn(false));
+      spi.addDigitalIn(new SimpleDigitalIn(false));
+      spi.addDigitalIn(new SimpleDigitalIn(false));
+      spi.addDigitalIn(new SimpleDigitalIn(false));
+      spi.addDigitalIn(new SimpleDigitalIn(false));
+      spi.addDigitalIn(new SimpleDigitalIn(false));
+      spi.addDigitalIn(new SimpleDigitalIn(false));
+      spi.addDigitalIn(new SimpleDigitalIn(false));
+      spi.addDigitalIn(new SimpleDigitalIn(false));
+      spi.addDigitalIn(new SimpleDigitalIn(false));
+      spi.addDigitalIn(new SimpleDigitalIn(false));
+      spi.addDigitalIn(new SimpleDigitalIn(false));
+      spi.addDigitalIn(new SimpleDigitalIn(false));
+      * 
+      */
+      
+      spi.addDigitalOut(new SimpleDigitalOut(false));
+      spi.addDigitalOut(new SimpleDigitalOut(true));
+      spi.addDigitalOut(new SimpleDigitalOut(true));
+      spi.addDigitalOut(new SimpleDigitalOut(true));
+      spi.addDigitalOut(new SimpleDigitalOut(true));
+      spi.addDigitalOut(new SimpleDigitalOut(true));
+      spi.addDigitalOut(new SimpleDigitalOut(true));
+      spi.addDigitalOut(new SimpleDigitalOut(true));
+      spi.addDigitalOut(new SimpleDigitalOut(true));
+      spi.addDigitalOut(new SimpleDigitalOut(true));
       spi.addDigitalOut(new SimpleDigitalOut(true));
       spi.addDigitalOut(new SimpleDigitalOut(false));
-      spi.addDigitalIn(new SimpleDigitalIn(false));
+
+
+
 
       // Holding Registers
+      spi.addRegister(new SimpleRegister(0)); // in decimal
+      spi.addRegister(new SimpleRegister(100)); // in decimal
+      spi.addRegister(new SimpleRegister(200)); // in decimal
+      spi.addRegister(new SimpleRegister(200)); // in decimal
+      spi.addRegister(new SimpleRegister(251)); // in decimal
+      spi.addRegister(new SimpleRegister(5)); // in decimal
+      spi.addRegister(new SimpleRegister(6)); // in decimal
+      spi.addRegister(new SimpleRegister(7)); // in decimal
+      spi.addRegister(new SimpleRegister(8)); // in decimal
+      spi.addRegister(new SimpleRegister(200)); // in decimal
+      
+      spi.addRegister(new SimpleRegister(251)); // in decimal
+      spi.addRegister(new SimpleRegister(200)); // in decimal
+      spi.addRegister(new SimpleRegister(251)); // in decimal
+      spi.addRegister(new SimpleRegister(200)); // in decimal
+      spi.addRegister(new SimpleRegister(251)); // in decimal
+      spi.addRegister(new SimpleRegister(200)); // in decimal
+      spi.addRegister(new SimpleRegister(251)); // in decimal
+      spi.addRegister(new SimpleRegister(200)); // in decimal
       spi.addRegister(new SimpleRegister(251)); // in decimal
       spi.addRegister(new SimpleRegister(200)); // in decimal
       
+      spi.addRegister(new SimpleRegister(251)); // in decimal
+      spi.addRegister(new SimpleRegister(200)); // in decimal
+      spi.addRegister(new SimpleRegister(251)); // in decimal
+      spi.addRegister(new SimpleRegister(200)); // in decimal
+      spi.addRegister(new SimpleRegister(251)); // in decimal
+      spi.addRegister(new SimpleRegister(200)); // in decimal
+      spi.addRegister(new SimpleRegister(26)); // in decimal
+      spi.addRegister(new SimpleRegister(27)); // in decimal
+      spi.addRegister(new SimpleRegister(28)); // in decimal
+      //spi.addRegister(new SimpleRegister(200)); // in decimal
+      
       // Input Registers
-      spi.addInputRegister(new SimpleInputRegister(45));
+      //spi.addInputRegister(new SimpleInputRegister(45));
 
       //2. create the coupler holding the image
       ModbusCoupler.getReference().setProcessImage(spi);

@@ -24,49 +24,22 @@ public class SlaveReader {
     private ModbusTCPTransaction trans = null;
       
     
-    
-    private HashMap houseVariables;
- 
-    public SlaveReader (TCPMasterConnection connection, HashMap vars)
+    public SlaveReader (TCPMasterConnection connection)
     {
-        houseVariables = vars;
         con = connection;
     }
     
-    public int Read (String name){
-        
-        int value;
-        
-        if (houseVariables.containsKey(name))
-        {
-            HouseVariable v = (HouseVariable)houseVariables.get(name);
-        
-            switch (v.functionCall) { //Read readable variables
-                case 1: //IX 
-                    value = readCoils(v.modbusAddr,1);
-                    return value;
-                case 3: //IW 
-                    value = readMultipleRegisters(v.modbusAddr,1);
-                    return value;
-            } 
-        }
-        else
-        {
-           System.out.println("Trying to read unrecognized variable"); 
-        }
-        return -1;
-    }
     
-    private int readCoils(int ref, int numberOfBits){ //FC!
+    public HashMap readCoils(int ref, int numberOfBits){ //FC!
         
         ReadCoilsRequest req01 = null;
         ReadCoilsResponse res01 = null;
-        int returnedValue = 0;
+        HashMap<Integer, Integer> readCoils = new HashMap<Integer, Integer>();
         
         try {
                 //1. Prepare request
                 req01 = new ReadCoilsRequest(ref, numberOfBits); 
-                if (Modbus.debug) System.out.println("Read coil request: " + req01.getHexMessage());
+                //if (Modbus.debug) System.out.println("Read coil request: " +  req01.getHexMessage());
                 
                 //2. Prepare the transaction
                 trans = new ModbusTCPTransaction(con);
@@ -78,30 +51,36 @@ public class SlaveReader {
                 
                 //4. Get response
                 res01 = (ReadCoilsResponse) trans.getResponse();
-                if (Modbus.debug) System.out.println("Response (hex): " + res01.getHexMessage() );
+                //if (Modbus.debug) System.out.println("Response (hex): " + res01.getHexMessage() );
+             
+                int coilIndex = ref;
                 
+                //5. Save coils in HashMap: key->coil address value->coil status
+                for (int i = 0; i < numberOfBits; i++)
+                {
+                    readCoils.put(Integer.valueOf(coilIndex),Integer.valueOf(res01.getCoilStatus(i)? 1 : 0)); //convert boolean to int
+                    coilIndex++;
+                }
                 
-                returnedValue = res01.getCoilStatus(7)? 1 : 0; //LSB
-                
-                System.out.println("Coils Status (binary)=" + returnedValue);
+                //System.out.println("Coils status (binary)=" + res01.getCoils());
                                           
             } catch (Exception ex) {
               ex.printStackTrace();
             }
         
-        return returnedValue;
+        return readCoils;
     }
     
-    private int readMultipleRegisters(int ref, int numberOfRegisters){ //FC3
+    public HashMap readMultipleRegisters(int ref, int numberOfRegisters){ //FC3
         
         ReadMultipleRegistersRequest req03 = null;
         ReadMultipleRegistersResponse res03 = null;
-        int returnedValue = 0;
+        HashMap<Integer, Integer> readRegisters = new HashMap<Integer, Integer>();
         
         try {
                 //1. Prepare request
                 req03 = new ReadMultipleRegistersRequest(ref, numberOfRegisters); 
-                if (Modbus.debug) System.out.println("Read reg request: " + req03.getHexMessage());
+                //if (Modbus.debug) System.out.println("Read reg request: " + req03.getHexMessage());
                 
                 //2. Prepare the transaction
                 trans = new ModbusTCPTransaction(con);
@@ -113,22 +92,23 @@ public class SlaveReader {
                 
                 //4. Get response
                 res03 = (ReadMultipleRegistersResponse) trans.getResponse();
-                if (Modbus.debug) System.out.println("Response (hex): " + res03.getHexMessage() );
+                //if (Modbus.debug) System.out.println("Response (hex): " + res03.getHexMessage() );
                 
-                //Compare variable
-                Register[] m_Registers = res03.getRegisters();
-                for (int i = 0 ; i < m_Registers.length; i++)
+                int registerIndex = ref;
+                
+                //5. Save registers in HashMap: key->register address value->register value
+                for (int i = 0 ; i < numberOfRegisters; i++)
                 {
-                    returnedValue = res03.getRegisterValue(i);
-                    System.out.println("Holding Register Status (decimal)= " + returnedValue);
-                    
+                    readRegisters.put(registerIndex,res03.getRegisterValue(i)); 
+                    registerIndex++;
+                    //System.out.println("Holding Register "+ ref+" Status (decimal)= " + returnedValue);  
                 }
                  
             } catch (Exception ex) {
               ex.printStackTrace();
             }
         
-        return returnedValue;
+        return readRegisters;
     }
     
 }

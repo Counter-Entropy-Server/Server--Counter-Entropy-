@@ -31,6 +31,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ***/
+    
 package net.wimpi.modbus.cmd;
 
 import java.util.*;
@@ -60,26 +61,21 @@ public class DITest {
     
   public static void main(String[] args) {
 
-    //Server-Client protocol  
-    ScoketsCommProtocol protocol;
-      
-    TCPMasterConnection con = null;
+    ScoketsCommProtocol protocol;   //Server-Client protocol 
+    //TCPMasterConnection con = null;
+    int socketPort = 4444;  //Sockets port
+    
+    //Command line arguments
+    InetAddress addr = null;    //Slave network address
+    int modbusPort = Modbus.DEFAULT_PORT;   // port number on WAGO usually 502
+    int slaveReadPeriod = 500;  //Read slave every slaveReadPeriod
+    String houseVariablesExcelFilePath = null;  //Path to read house variables xls file
 
-    //Read slave every slaveReadPeriod
-    int slaveReadPeriod = 500;
+    CEModbusTCPMaster master = null;
+    CEHouse house = null;
+    DBComm db = null;
+    ServerSocketComm socket = null;
     
-    //Slave network address
-    InetAddress addr = null;
-    
-    //Slave network port
-    int modbusPort = Modbus.DEFAULT_PORT; // port number on WAGO usually 502
-    
-    //Sockets port
-    int socketPort = 4444;
-    
-    //Path to read house variables xls file
-    String houseVariablesExcelFilePath = null;
-
     try {
 
         //1. Setup the parameters
@@ -88,15 +84,15 @@ public class DITest {
             System.exit(1);
         } else {
             try {
-                houseVariablesExcelFilePath = args[2];
-                slaveReadPeriod = Integer.parseInt(args[1]);
+                houseVariablesExcelFilePath = args[2]; //excel file path
+                slaveReadPeriod = Integer.parseInt(args[1]); //wago read period
                 String astr = args[0];
                 int idx = astr.indexOf(':');
                 if(idx > 0) {
-                    modbusPort = Integer.parseInt(astr.substring(idx+1)); 
+                    modbusPort = Integer.parseInt(astr.substring(idx+1)); //port of wago
                     astr = astr.substring(0,idx);
                 }
-                addr = InetAddress.getByName(astr); // ip-address of WAGO 
+                addr = InetAddress.getByName(astr); //ip-address of WAGO 
             } catch (Exception ex) {
             ex.printStackTrace();
                 printUsage();
@@ -105,188 +101,54 @@ public class DITest {
         }
 
         //2. Open the connection
-        con = new TCPMasterConnection(addr);
-        con.setPort(modbusPort);
-        con.connect();
-
-        if (Modbus.debug) System.out.println("Connected to " + addr.toString() + ":" + con.getPort());
+        master = new CEModbusTCPMaster();
+        master.connect(addr,modbusPort);
+        //con = new TCPMasterConnection(addr);
+        //con.setPort(modbusPort);
+        //con.connect();
+        //if (Modbus.debug) System.out.println("Connected to " + addr.toString() + ":" + con.getPort());
 
         //3. Process xls file and get house variables
-        HashMap houseVariables;
-        houseVariables = getHouseVariables(houseVariablesExcelFilePath);
-        
+        house = new CEHouse();
+        HashMap houseVariables = house.getHouseVariablesFromFile(houseVariablesExcelFilePath);
+        //HashMap houseVariables = getHouseVariables(houseVariablesExcelFilePath); //key->variable-name value->houseVariable object
+        //ArrayList addressSequances = getModbusAddressSequances(houseVariables); //groups consecutive modbus addresses to read them with one command
+       
         //4. Instantiate database communication object
-        DBComm db = new DBComm(); //(can send the server ip address from command line?)
-        //fill devices table in database
-        db.FillDevices(houseVariables);
+        db = new DBComm(); 
+        db.FillDevices(houseVariables); //fill devices table in database for once
                
-        //5. Instantiate slave reader object
-        SlaveReader r = new SlaveReader(con,houseVariables);
-
-        //6. Instantiate slave writer object
-        SlaveWriter w = new SlaveWriter(con,houseVariables);
+        //5. Instantiate slave (wago) reader and writer objects
+        //SlaveReader r = new SlaveReader(con,houseVariables);
+        //SlaveWriter w = new SlaveWriter(con,houseVariables);
+                
+        //6. Open network sockets to communicate with other systems
+        socket = new ServerSocketComm(socketPort,2); //can communicate with 2 clients on port socketPort 
+        socket.setHouseReferance(house);
+        (new Thread(socket)).start(); //timer on one thread and server socket on another. Each client socket has its own thread
         
-        //7. Open network sockets to communicate with other systems
-        protocol = ScoketsCommProtocol.getInstance();
-        ServerSocketComm socket = new ServerSocketComm(socketPort, protocol);
-        (new Thread(socket)).start();
-        System.out.println("Socket opened");
-        
-        //8. Start timer to read from slave
+        //7. Start timer to read from slave (wago)
         Timer timer = new Timer("Read slave period "+slaveReadPeriod);
-
-        ReadSlaveTimerCall t = new ReadSlaveTimerCall(r,w,houseVariables,db,protocol);
-
+        ReadSlaveTimerCall t = new ReadSlaveTimerCall(master, house,db,socket);
         timer.schedule(t, 0, slaveReadPeriod); 
-
-        //Close the connection
-        //con.close();
+        
+        
 
     } catch (Exception ex) {
       ex.printStackTrace();
+      System.err.println("Errore in Server. Server will shut down!");
+      if(master != null) master.closeConnection();
     }
   }
 
   private static void printUsage() {
-    System.out.println("");
+    System.out.println("Counter Entropy Server: communicates house status with wago, database and clients");
   }
-
-  private static HashMap getHouseVariables(String path) {
-    
-    HashMap variables;
-      try
-      {
-        //read xls file into HashMap
-        ReadExcel reader = new ReadExcel();
-        reader.setInputFile(path);
-        variables = reader.read();
-        
-        return variables;
-
-      } catch (Exception ex) {
-        ex.printStackTrace();
-      }
-    return null;
-  }
-
+ 
 }//class DITest
 
-class ReadSlaveTimerCall extends TimerTask { //Implements the run() method called by timer
-    
-    //times member represent calling times
-    private int times = 0;
-    
-    //flag to log all variables whether changed from previous reading or not
-    boolean forceLog; 
-    
-    //referance to slave reader and writer
-    SlaveWriter writer;
-    SlaveReader reader;
-    
-    //referance to database
-    DBComm database;
-    
-    //house variables
-    HashMap houseVariables;
-    HashMap clientVariables;
-    HouseVariable v;
-    
-    //variables to notify clients about 
-    HouseVariable [] variablesWithNewValues;
-    
-    String dbRequest;
-    
-    //get clients data
-    ScoketsCommProtocol protocol;
-    
-    int variablesToNotifyClientsCount = 0;
-    
-    public ReadSlaveTimerCall(SlaveReader r, SlaveWriter w, HashMap variables, DBComm db, ScoketsCommProtocol protocol){
-        reader = r;
-        writer = w;
-        houseVariables = variables;
-        database = db;
-        this.protocol = protocol;
-    }
-            
-    //Called by timer
-    public void run() {
-        
-        times++; 
-        
-        //Log all variables every 5 mins
-        if (times == 1) {
-            forceLog = true; 
-            System.out.println("Timer: Write everything to db");
-        } else if (times >= 100){
-            forceLog = false;
-            times = 0;
-        }
-        
-        // Stop timer (for testing purpose)
-        //this.cancel();
-        
-        //Get clients data
-        clientVariables = protocol.getvariablesFromClients();
-        
-        //Iterate over all new variables values from clients to update houseVariables and write
-        Iterator it1 = clientVariables.entrySet().iterator();
-        while (it1.hasNext()) {
-            Map.Entry pairs = (Map.Entry)it1.next();
-            v = (HouseVariable) houseVariables.get((String)pairs.getKey());
-            
-            if (v.value != Integer.parseInt((String)pairs.getValue())){ //&& writable?
-                v.value = Integer.parseInt((String)pairs.getValue());
-                writer.Write(v.name,v.value);
-            }
-        }        
-        
-        //Iterate over all houseVariables to read
-        Iterator it2 = houseVariables.entrySet().iterator();
-        while (it2.hasNext()) {
-            Map.Entry pairs = (Map.Entry)it2.next();
-            v = (HouseVariable)pairs.getValue();
-            
-            if (!v.readable) //only readable variables
-                continue;
-            
-            int value = reader.Read(v.name); 
-            
-            //Compare new variable value with previous read
-            if (v.value != value){ 
-                v.value = value;
-                v.updated = true; //mark to notify other systems 
-            }
-            
-            //Update database and notify other systmes
-            if (v.updated || forceLog)
-            {
-                //log to db
-                dbRequest = "/setDeviceStateByAddress?address="+v.modbusAddr+"&state="+v.value;
-                database.sendGetRequest(dbRequest);
-                                
-                if (v.updated){
-                    //notify other systems
-                    if (variablesWithNewValues == null)
-                        variablesWithNewValues = new HouseVariable [70]; 
-                    variablesWithNewValues[variablesToNotifyClientsCount] = v;
-                    variablesToNotifyClientsCount++;
-                    
-                }   
-                
-                v.updated = false;
-            }
-            
-        }
-        
-        if (variablesToNotifyClientsCount > 0){
-            if (protocol.notifyClients(variablesWithNewValues,variablesToNotifyClientsCount)){
-            variablesToNotifyClientsCount =0;
-            }     
-        }
-        
-    }
-}
+
+
 
 
 

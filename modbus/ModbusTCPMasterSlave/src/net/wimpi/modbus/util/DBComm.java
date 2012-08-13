@@ -20,6 +20,23 @@ import java.util.*;
  */
 public class DBComm {
     
+    
+    public DBComm (){
+        
+        try{
+            
+            URL url = new URL("http://localhost:3000/");
+	    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            if (conn.getInputStream() != null)
+                System.out.println("Connected to database");
+            
+        }catch (Exception ex){
+           System.err.println("ERR: Cannot connect to database");
+        }
+    }
+    
+
+
     public  String sendPostRequest(String data) {
         
         //Build parameter string
@@ -58,8 +75,7 @@ public class DBComm {
 
         } catch (RuntimeException e) {
             return "RuntimeException: "+e;
-        }
-        catch (MalformedURLException e) {
+        }catch (MalformedURLException e) {
             return res;
         } catch (IOException e) {
             return res;
@@ -83,15 +99,14 @@ public class DBComm {
 	result+="}}";
 
 	return result;
-  
     }
     
 
     public String sendGetRequest(String data) {
+        
         //Build parameter string
-    String res = "";
+        String res = "";
         try {
-            
             // Send the request
             String urlString = "http://localhost:3000/devices"+data;
 	    URLEncoder.encode(urlString, "UTF-8");
@@ -111,18 +126,16 @@ public class DBComm {
 	  } 
 	  catch (RuntimeException e) {
 	      return "RuntimeException: "+e;
-	  }
-	  catch (MalformedURLException e) 
-	  {
+          }catch (MalformedURLException e){
 	      return res;
-	  } catch (IOException e) {
- 
+	  }catch (IOException e) {
 	      return res;
 	  }
       return res;
     }
     
-    //Fills device table with name and adress of each house device (if the device already exists nothing happens)
+    //Fills device table with name and adress of each house device 
+    //(if the device already exists nothing happens)
     public void FillDevices(HashMap houseVariables){
         
         HouseVariable v;
@@ -134,28 +147,34 @@ public class DBComm {
         while (it.hasNext()) {
             Map.Entry pairs = (Map.Entry)it.next();
             v = (HouseVariable)pairs.getValue();
+            
             devices.put("var_name",  v.name);
             devices.put("address",  ""+v.modbusAddr+"");
-            
-            String str =  sendHashTable(devices);
-
-            System.out.println("Post device to databse result"+ sendPostRequest(str));
-        }
         
+            String dataToSend = sendHashTable(devices);
+            sendPostRequest(dataToSend);
+        }
+               
     }
-
+    
+    public void updateVariableByAddress(int addr, int state){
+        
+        String dbRequest;
+        dbRequest = "/setDeviceStateByAddress?address="+addr+"&state="+state;
+        sendGetRequest(dbRequest);
+    }
+            
 }
+
+
+//List of commands that can be used to communicate with database
 /*
-
-	//String res = sendGetRequest("/getDeviceByName?name=light");
-	System.out.println(res);
-
-	//sendGetRequest("/setDeviceStateByName?name=light&state=0");
-	//sendGetRequest("/setDeviceStateByAddress?address=00&state=0");
-	//sendGetRequest("/getDeviceByName?name=light");
-	//sendGetRequest("/getDeviceByAddress?address=11");
-	//sendGetRequest("/getRangeByName?name=light&start_time=2012-08-05 22:53:02&end_time=2012-08-05 23:55:02");
-	//sendGetRequest("/getRangeByName?address=11&start_time=2012-08-05 18:57:02&end_time=2012-08-05 22:41:02");
-	//sendGetRequest(".json");
-        * 
-        */
+//sendGetRequest("/setDeviceStateByName?name=light&state=0");
+//sendGetRequest("/setDeviceStateByAddress?address=00&state=0");
+//sendGetRequest("/getDeviceByName?name=light");
+//sendGetRequest("/getDeviceByAddress?address=11");
+//sendGetRequest("/getRangeByName?name=light&start_time=2012-08-05 22:53:02&end_time=2012-08-05 23:55:02");
+//sendGetRequest("/getRangeByName?address=11&start_time=2012-08-05 18:57:02&end_time=2012-08-05 22:41:02");
+//sendGetRequest(".json");
+* 
+*/

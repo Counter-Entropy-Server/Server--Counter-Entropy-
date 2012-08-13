@@ -6,6 +6,8 @@ package net.wimpi.modbus.util;
 
 import java.net.*;
 import java.io.*;
+import java.util.ArrayList;
+import net.wimpi.modbus.cmd.CEHouse;
 
 /**
  *
@@ -22,15 +24,19 @@ import java.io.*;
 
 public class ServerSocketComm implements Runnable{
     
-   private int maxNumOfListeners = 2; //iPad and kinect 
-   private ServerSocketThread [] socketListeners = new ServerSocketThread[maxNumOfListeners];
-   private ScoketsCommProtocol protocol;
-   private int port = 4444;
+   public ScoketsCommProtocol protocol;
     
-    public ServerSocketComm (int port, ScoketsCommProtocol protocol ) {
+   private int maxNumOfListeners; //iPad and kinect 
+   private ArrayList<ServerSocketThread> socketListeners = new ArrayList<ServerSocketThread>();
+   private int port = 4444;
+   private ServerSocketThread listener;
+   private CEHouse house;
+    
+    public ServerSocketComm (int port, int maxNumOfListeners) {
         
         this.port = port;
-        this.protocol = protocol;
+        this.protocol = ScoketsCommProtocol.getInstance(); //prepare string to send to clients and parse recived strings from clients        
+        this.maxNumOfListeners = maxNumOfListeners;
     }
     
     public void run(){
@@ -45,10 +51,10 @@ public class ServerSocketComm implements Runnable{
             
             while (listening && socketListenersCounter < maxNumOfListeners){
             System.out.println("Server listening on port: " + port);
-            socketListeners [socketListenersCounter] = new ServerSocketThread(serverSocket.accept(),protocol);
-            socketListeners [socketListenersCounter].start();
-            socketListenersCounter++;
-            System.out.println("Number of port listeners: " + socketListenersCounter);
+            listener = new ServerSocketThread(serverSocket.accept(),protocol);
+            socketListeners.add(listener);
+            listener.start();
+            System.out.println("Number of port listeners: " + socketListenersCounter++);
         }
         
         
@@ -61,9 +67,33 @@ public class ServerSocketComm implements Runnable{
     }
            
     
-    public ServerSocketThread [] getSocketListeners()
-    {
+    public ArrayList getSocketListeners(){
+        
         return  socketListeners;
+    }
+    
+ 
+    /*
+    public void addNewNotification(HouseVariable v){
+        
+        protocol.addNewNotification(v);
+    }
+    
+    public void notifyClients()
+    {
+        if (socketListeners.size() > 0){
+           for (int i = 0 ; i < socketListeners.size(); i++ ){
+                socketListeners.get(i).notifyClient(protocol.getNotificationsFromServer());
+           }
+           protocol.clearNotifactionsFromServer(); 
+        } 
+    }
+    * 
+    */
+
+    public void setHouseReferance(CEHouse house) {
+        this.house= house;
+        protocol.setHouseReferance(house);    
     }
     
 }

@@ -13,10 +13,11 @@ import java.net.*;
  */
 public class ClientSocketComm {
     
+    private static PrintWriter out = null;
+    
     public static void main(String[] args) throws IOException {
  
         Socket socket = null;
-        PrintWriter out = null;
         BufferedReader in = null;
  
         try {
@@ -40,19 +41,28 @@ public class ClientSocketComm {
  
         while ((fromServer = in.readLine()) != null) {
             System.out.println("Server: " + fromServer);
-            if (fromServer.equals("Bye."))
-                break;
-             
+            
             fromUser = stdIn.readLine();
-        if (fromUser != null) {
-                System.out.println("Client: " + fromUser);
-                out.println(fromUser);
-        }
+            if (fromUser != null) {
+            System.out.println("Client: " + fromUser);
+            out.println("light1:1");
+            }
         }
  
         out.close();
         in.close();
         stdIn.close();
         socket.close();
+    }
+    
+    public static void sendDataToServer (String [] variablesWithNewValues)
+    {
+        String fromClient = null;
+        
+        if (variablesWithNewValues.length>0){
+          System.out.println("Client: " + fromClient);
+          out.println(fromClient);  
+        }
+        
     }
 }

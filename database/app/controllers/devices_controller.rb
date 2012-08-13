@@ -111,12 +111,12 @@ end
 
     respond_to do |format|
       if @device.save
-	t = Time.new
-	values = t.to_a
-	@time = Time.utc(*values)
-	Log.create(:address => @device[:address],
-                      :state => '0',
-                      :time => @time)
+	#t = Time.new
+	#values = t.to_a
+	#@time = Time.utc(*values)
+	#Log.create(:address => @device[:address],
+        #              :state => '0',
+        #              :time => @time)
         format.html { redirect_to @device, notice: 'Device was successfully created.' }
         format.json { render json: @device, status: :created, location: @device }
       else

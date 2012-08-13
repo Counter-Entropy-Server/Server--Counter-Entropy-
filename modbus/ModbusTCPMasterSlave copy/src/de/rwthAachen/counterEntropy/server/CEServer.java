@@ -69,8 +69,6 @@ public class CEServer {
     
   public static void main(String[] args) {
 
-    CEScoketsProtocol protocol;   //Server-Client protocol 
-    //TCPMasterConnection con = null;
     int socketPort = 4444;  //Sockets port
     
     //Command line arguments
@@ -79,6 +77,7 @@ public class CEServer {
     int slaveReadPeriod = 500;  //Read slave every slaveReadPeriod
     String houseVariablesExcelFilePath = null;  //Path to read house variables xls file
 
+    //Server controls
     CEModbusTCPMaster master = null;
     CEHouse house = null;
     CEDatabaseComm db = null;
@@ -97,10 +96,10 @@ public class CEServer {
                 String astr = args[0];
                 int idx = astr.indexOf(':');
                 if(idx > 0) {
-                    modbusPort = Integer.parseInt(astr.substring(idx+1)); //port of wago
+                    modbusPort = Integer.parseInt(astr.substring(idx+1)); //port of slave (wago)
                     astr = astr.substring(0,idx);
                 }
-                addr = InetAddress.getByName(astr); //ip-address of WAGO 
+                addr = InetAddress.getByName(astr); //ip-address of slave (wago) 
             } catch (Exception ex) {
             ex.printStackTrace();
                 printUsage();
@@ -111,31 +110,28 @@ public class CEServer {
         //2. Open the connection
         master = new CEModbusTCPMaster();
         master.connect(addr,modbusPort);
-        //con = new TCPMasterConnection(addr);
-        //con.setPort(modbusPort);
-        //con.connect();
-        //if (Modbus.debug) System.out.println("Connected to " + addr.toString() + ":" + con.getPort());
 
-        //3. Process xls file and get house variables
+        //3. Intitialize house with house variables
         house = new CEHouse();
         HashMap houseVariables = house.getHouseVariablesFromFile(houseVariablesExcelFilePath);
-        //HashMap houseVariables = getHouseVariables(houseVariablesExcelFilePath); //key->variable-name value->houseVariable object
-        //ArrayList addressSequances = getModbusAddressSequances(houseVariables); //groups consecutive modbus addresses to read them with one command
-       
+        
         //4. Instantiate database communication object
         db = new CEDatabaseComm(); 
         db.FillDevices(houseVariables); //fill devices table in database for once
-               
-        //5. Instantiate slave (wago) reader and writer objects
-        //SlaveReader r = new SlaveReader(con,houseVariables);
-        //SlaveWriter w = new SlaveWriter(con,houseVariables);
-                
-        //6. Open network sockets to communicate with other systems
+             
+        /*
+        //use for testing wago communication and database logging
+        System.out.println(master.readByName("light1",house));
+        master.writeByName("light1",1,house);
+        System.out.println(master.readByName("light1",house));
+        */
+        
+        //5. Open network sockets to communicate with other systems
         socket = new CEServerSocket(socketPort,2); //can communicate with 2 clients on port socketPort 
         socket.setHouseReferance(house);
-        (new Thread(socket)).start(); //timer on one thread and server socket on another. Each client socket has its own thread
+        (new Thread(socket)).start(); //timer is on one thread and server socket on another. Each client socket has its own thread.
         
-        //7. Start timer to read from slave (wago)
+        //6. Start timer to read from slave (wago)
         Timer timer = new Timer("Read slave period "+slaveReadPeriod);
         ReadSlaveTimerCall t = new ReadSlaveTimerCall(master, house,db,socket);
         timer.schedule(t, 0, slaveReadPeriod); 
@@ -153,7 +149,7 @@ public class CEServer {
     System.out.println("Counter Entropy Server: communicates house status with wago, database and clients");
   }
  
-}//class DITest
+}
 
 
 

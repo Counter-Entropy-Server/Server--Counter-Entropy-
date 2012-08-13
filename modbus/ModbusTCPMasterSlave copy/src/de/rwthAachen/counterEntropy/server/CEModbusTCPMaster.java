@@ -87,4 +87,22 @@ public class CEModbusTCPMaster {
         }
         
     }
+    
+    public int readByName(String name, CEHouse house){
+        
+        CEHouseVariable v = house.findByName(name);
+        if(v != null){
+           HashMap values = read(v.modbusAddr,v.modbusAddr+1,v.readFunctionCall);
+            return (Integer) values.get(v.modbusAddr);
+        }
+        return -1000; //err
+    }
+    
+    public void writeByName(String name, int value, CEHouse house){
+        
+        CEHouseVariable v = house.findByName(name);
+        value = v.reverseFormatValue(value);
+        if(v != null)
+            write(v.modbusAddr,value,v.writeFunctionCall);
+    }
 }

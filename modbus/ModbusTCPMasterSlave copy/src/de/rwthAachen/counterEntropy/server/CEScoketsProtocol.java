@@ -57,6 +57,28 @@ public class CEScoketsProtocol {
         
         variablesDelims = "[ ]";
         variables = theInput.split(variablesDelims);
+        if (variables[0].equalsIgnoreCase("toggel")){
+ 
+            String request;
+
+            variablesDelims = "[,]";
+            request = variables[1];
+            variables = request.split(variablesDelims);
+
+            for (int i = 0; i < variables.length; i++){
+                if ("" != variables[i]){
+                    CEHouseVariable v = house.findByName(variables[i]);
+                    if (v != null && "IX".equals(v.type))
+                        variablesFromClients.put(variables[i],v.value==1?"0":"1");
+                } 
+            }
+            
+            theOutput = "data recived";
+            return theOutput;
+        }
+        
+        variablesDelims = "[ ]";
+        variables = theInput.split(variablesDelims);
         if (variables[0].equalsIgnoreCase("read")){
  
             String request;
@@ -90,8 +112,8 @@ public class CEScoketsProtocol {
             for (int i = 0; i < variables.length; i++){
                 if (variables[i].split(variablesDelims).length != 2) //wrong format
                     continue;
-                key = variables[i].split(variablesDelims)[0];
-                value = variables[i].split(variablesDelims)[1];
+                key = variables[i].split(variablesDelims)[0]; //name
+                value = variables[i].split(variablesDelims)[1]; //value
 
                 if (key == null || value == null) //empty strings
                     continue;
@@ -140,6 +162,9 @@ public class CEScoketsProtocol {
         String name;
         int value;
         String notificationString = "";
+        
+        if (map == null)
+            return "Unrecognized variables";
         
         Iterator it = map.entrySet().iterator();
         while (it.hasNext()) {

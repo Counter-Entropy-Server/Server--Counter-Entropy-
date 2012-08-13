@@ -169,7 +169,8 @@ public class CEHouse {
         
         for (int i = 0 ; i < names.size(); i++){
             v = findByName((String)names.get(i));
-            values.put(v.name,Integer.valueOf((v.value)));
+            if (v != null)
+                values.put(v.name,Integer.valueOf((v.value)));
         }
         
         return values;

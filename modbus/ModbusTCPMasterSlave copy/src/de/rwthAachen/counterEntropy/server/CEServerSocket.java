@@ -42,18 +42,18 @@ public class CEServerSocket implements Runnable{
         
         ServerSocket serverSocket = null;
         boolean listening = true;
-        int socketListenersCounter = 0;
+        //int socketListenersCounter = 0;
         
         
         try {
             serverSocket = new ServerSocket(port);
-            
-            while (listening && socketListenersCounter < maxNumOfListeners){
-                System.out.println("Server listening on port: " + port);
+            System.out.println("Server listening on port: " + port);
+
+            while (listening && socketListeners.size() < maxNumOfListeners){
                 listener = new CESocketThread(serverSocket.accept(),protocol);
                 socketListeners.add(listener);
                 listener.start();
-                System.out.println("Number of port listeners: " + socketListenersCounter++);
+                System.out.println("Number of port listeners: " + getLiveClientSockets().size());
         }
         
         
@@ -65,6 +65,17 @@ public class CEServerSocket implements Runnable{
         }        
     }
            
+    
+    private ArrayList getLiveClientSockets()
+    {
+
+        for (CESocketThread thread:socketListeners){
+            if (!thread.socket.isConnected()){
+                socketListeners.remove(thread);
+            }
+        }
+        return socketListeners;
+    }
     
     public ArrayList getSocketListeners(){
         

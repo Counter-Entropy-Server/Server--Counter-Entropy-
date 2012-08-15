@@ -18,7 +18,7 @@ import java.io.*;
  */
 public class CESocketThread extends Thread {
     
-    private Socket socket = null;
+    public Socket socket = null;
     private CEScoketsProtocol protocol = null;
     
     private PrintWriter out = null;
@@ -54,7 +54,7 @@ public class CESocketThread extends Thread {
             try {
                     out.close(); 
                     in.close();
-                    //socket.close();
+                    socket.close();
                 }catch (IOException e) {
                     e.printStackTrace();
                 }

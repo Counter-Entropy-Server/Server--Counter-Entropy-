@@ -44,7 +44,7 @@ public class ReadSlaveTimerCall extends TimerTask {
         } else {
             forceLog = false;
             times++;
-            if (times >= 100)
+            if (times >= 5)
                 times = 0;
         }
         

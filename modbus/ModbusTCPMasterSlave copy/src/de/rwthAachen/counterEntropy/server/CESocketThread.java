@@ -49,10 +49,19 @@ public class CESocketThread extends Thread {
                 } 
 	    }
 
-	} catch (IOException e) {
+	}catch(SocketException ex){
+            System.out.println("Closing client socket");
+            try {
+                    out.close(); 
+                    in.close();
+                    //socket.close();
+                }catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }catch (IOException e) {
 	    e.printStackTrace();
             try {
-                    System.err.println("Closing client socket");
+                System.err.println("Closing client socket");
                 out.close(); 
                 in.close();
                 socket.close(); 

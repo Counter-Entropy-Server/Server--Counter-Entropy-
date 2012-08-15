@@ -49,11 +49,11 @@ public class CEServerSocket implements Runnable{
             serverSocket = new ServerSocket(port);
             
             while (listening && socketListenersCounter < maxNumOfListeners){
-            System.out.println("Server listening on port: " + port);
-            listener = new CESocketThread(serverSocket.accept(),protocol);
-            socketListeners.add(listener);
-            listener.start();
-            System.out.println("Number of port listeners: " + socketListenersCounter++);
+                System.out.println("Server listening on port: " + port);
+                listener = new CESocketThread(serverSocket.accept(),protocol);
+                socketListeners.add(listener);
+                listener.start();
+                System.out.println("Number of port listeners: " + socketListenersCounter++);
         }
         
         

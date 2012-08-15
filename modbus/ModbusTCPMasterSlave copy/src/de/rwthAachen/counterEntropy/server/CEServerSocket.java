@@ -83,23 +83,23 @@ public class CEServerSocket implements Runnable{
     }
     
  
-    /*
-    public void addNewNotification(HouseVariable v){
+    
+    public void addNewNotification(CEHouseVariable v){
         
         protocol.addNewNotification(v);
     }
     
     public void notifyClients()
     {
-        if (socketListeners.size() > 0){
+        String notifications = protocol.getNotificationsFromServer();
+        if (socketListeners.size() > 0 && !notifications.equals("")){
            for (int i = 0 ; i < socketListeners.size(); i++ ){
-                socketListeners.get(i).notifyClient(protocol.getNotificationsFromServer());
+                socketListeners.get(i).notifyClient(notifications);
            }
            protocol.clearNotifactionsFromServer(); 
         } 
     }
-    * 
-    */
+    
 
     public void setHouseReferance(CEHouse house) {
         this.house= house;

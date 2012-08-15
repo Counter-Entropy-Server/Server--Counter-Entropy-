@@ -47,6 +47,7 @@ public class CESocketThread extends Thread {
                    outputLine = protocol.processInput(inputLine);   //get the server answer
                    out.println(outputLine);                         //send the server answer to client
                 } 
+                
 	    }
 
 	}catch(SocketException ex){
@@ -72,11 +73,11 @@ public class CESocketThread extends Thread {
 	}
     }
     
-    /*
+    
     public void notifyClient(String notifications){
-        out.println(protocol.getNotificationsFromServer()); //send data from server to client    
+        //if (out != null && socket.isConnected())
+            //out.println(notifications); //send data from server to client    
     }
-    * 
-    */
+    
     
 }

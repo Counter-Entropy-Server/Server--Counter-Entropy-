@@ -23,6 +23,7 @@ public class ReadSlaveTimerCall extends TimerTask {
     private CEDatabaseComm db = null;
     private CEServerSocket socket = null;
     private HashMap houseVariables = null;
+    private int forceLogTimes = 100;
     
     public ReadSlaveTimerCall(CEModbusTCPMaster master, CEHouse house, CEDatabaseComm db, CEServerSocket socket){
         this.master = master;
@@ -44,7 +45,7 @@ public class ReadSlaveTimerCall extends TimerTask {
         } else {
             forceLog = false;
             times++;
-            if (times >= 5)
+            if (times >= forceLogTimes)
                 times = 0;
         }
         
@@ -168,13 +169,13 @@ public class ReadSlaveTimerCall extends TimerTask {
             
             //Notify clients
             if (v.updated){
-                //socket.addNewNotification(v);
+                socket.addNewNotification(v);
             } 
             
             v.updated = false;
         }
         
-        //socket.notifyClients();
+        socket.notifyClients(); //if there are any
     }
        
         

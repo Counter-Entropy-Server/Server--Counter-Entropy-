@@ -35,16 +35,20 @@ public class ReadSlaveTimerCall extends TimerTask {
     //Called by timer
     public void run() { 
         
+        
+        
         //Log all variables to database every X mins (whether updates or not)
         if (times == 0) {
             forceLog = true; 
+            times++;
         } else {
             forceLog = false;
+            times++;
             if (times >= 100)
                 times = 0;
         }
         
-        times++;
+        
        
         //this.cancel(); //stop timer (for testing purpose)
         

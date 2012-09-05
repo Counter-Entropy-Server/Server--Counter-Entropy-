@@ -5,6 +5,8 @@
 package de.rwthAachen.counterEntropy.server;
 
 import de.rwthAachen.counterEntropy.server.CEDatabaseComm;
+import de.rwthAachen.counterEntropy.server.CESocketThread;
+
 import java.util.*;
 
 /**
@@ -164,7 +166,7 @@ public class ReadSlaveTimerCall extends TimerTask {
             
             //Update database 
             if (v.updated || forceLog){
-                db.updateVariableByAddress(v.modbusAddr,v.value);                              
+                db.updateVariableByAddress(v.value,v.modbusAddr);                              
             }
             
             //Notify clients
@@ -175,7 +177,21 @@ public class ReadSlaveTimerCall extends TimerTask {
             v.updated = false;
         }
         
-        socket.notifyClients(); //if there are any
+        socket.getLivePortListeners();
+        //method one
+        //socket.notifyClients(); //if there are any
+        
+        //method two
+        /*
+        String notifications = socket.protocol.getNotificationsFromServer();
+        if (socket.getLivePortListeners().size() > 0 && !notifications.equals("")){
+           for (int i = 0 ; i < socket.getLivePortListeners().size(); i++ ){
+                //((CESocketThread)socket.getLivePortListeners().get(i)).out.print(notifications);
+           }
+           socket.protocol.clearNotifactionsFromServer(); 
+        }
+        * */
+       
     }
        
         

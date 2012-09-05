@@ -33,6 +33,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  ***/
     
+/*
+ * To run the slave simulator (wago simulator) in the terminal:
+ * ModbusTCPMasterSlave nur$ java -Dnet.wimpi.modbus.debug=true   -cp build/classes:lib/jxl.jar net.wimpi.modbus.cmd.TCPSlaveTest 12345
+ * To run client simulator in the terminal:
+ * SocketsComm nur$ java -cp build/classes socketscomm.ClientSoctComm
+ * To run the database in terminal:
+ * database nur$ rails server
+ * To clear the database in terminal:
+ * database nur$ rake db:reset
+ * To close databse in terminal:
+ * ctrl+c
+ * 
+ * NOTE: system exits in 2 cases: 1- cannot connect to WAGO 2- cannot connect to socket
+ */
 package de.rwthAachen.counterEntropy.server;
 
 
@@ -60,7 +74,7 @@ import net.wimpi.modbus.util.*;
 /**
  * Class that implements a server to communicate with WAGO systems via TCPModucBuas protocol
  *
- * @author Nur Hamdan
+ * @author Nur Al-huda Hamdan
  * @version 1 (07/08/2012)
  * adapted from creator Dieter Wimberger
  */
@@ -117,7 +131,7 @@ public class CEServer {
         
         //4. Instantiate database communication object
         db = new CEDatabaseComm(); 
-        db.FillDevices(houseVariables); //fill devices table in database for once
+        db.fillWithDevices(houseVariables); //fill devices table in database for once
              
         /*
         //use for testing wago communication and database logging
@@ -127,7 +141,7 @@ public class CEServer {
         */
         
         //5. Open network sockets to communicate with other systems
-        socket = new CEServerSocket(socketPort,2); //can communicate with 2 clients on port socketPort 
+        socket = new CEServerSocket(socketPort);
         socket.setHouseReferance(house);
         (new Thread(socket)).start(); //timer is on one thread and server socket on another. Each client socket has its own thread.
         

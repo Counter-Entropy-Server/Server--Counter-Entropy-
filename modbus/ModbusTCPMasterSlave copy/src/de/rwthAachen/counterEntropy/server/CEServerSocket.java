@@ -25,17 +25,17 @@ public class CEServerSocket implements Runnable{
     
    public CEScoketsProtocol protocol;
     
-   private int maxNumOfListeners; //iPad and kinect 
+   //private int maxNumOfListeners; //iPad and kinect 
    private ArrayList<CESocketThread> socketListeners = new ArrayList<CESocketThread>();
    private int port = 4444;
    private CESocketThread listener;
    private CEHouse house;
     
-    public CEServerSocket (int port, int maxNumOfListeners) {
+    public CEServerSocket (int port){//, int maxNumOfListeners) {
         
         this.port = port;
         this.protocol = CEScoketsProtocol.getInstance(); //prepare string to send to clients and parse recived strings from clients        
-        this.maxNumOfListeners = maxNumOfListeners;
+        //this.maxNumOfListeners = maxNumOfListeners;
     }
     
     public void run(){
@@ -49,41 +49,34 @@ public class CEServerSocket implements Runnable{
             serverSocket = new ServerSocket(port);
             System.out.println("Server listening on port: " + port);
 
-            while (listening && socketListeners.size() < maxNumOfListeners){
+            while (listening){
                 listener = new CESocketThread(serverSocket.accept(),protocol);
                 socketListeners.add(listener);
                 listener.start();
-                System.out.println("Number of port listeners: " + getLiveClientSockets().size());
+                System.out.println("Number of port listeners: " + getLivePortListeners().size());
         }
         
         
         serverSocket.close();
         
         } catch (IOException e) {
-            System.err.println("Could not listen on port: " + port);
+            System.out.println("Cannot listen on port: " + port + ". System will exit.");
             System.exit(-1);
         }        
     }
            
     
-    private ArrayList getLiveClientSockets()
-    {
-
+    public ArrayList getLivePortListeners(){
+        ArrayList<CESocketThread> listeners = new ArrayList<CESocketThread>();
         for (CESocketThread thread:socketListeners){
-            if (!thread.socket.isConnected()){
-                socketListeners.remove(thread);
+            if (!thread.socket.isClosed()){
+                listeners.add(thread);
+                //socketListeners.remove(thread);
             }
         }
-        return socketListeners;
+        return listeners;
     }
-    
-    public ArrayList getSocketListeners(){
         
-        return  socketListeners;
-    }
-    
- 
-    
     public void addNewNotification(CEHouseVariable v){
         
         protocol.addNewNotification(v);
@@ -92,9 +85,10 @@ public class CEServerSocket implements Runnable{
     public void notifyClients()
     {
         String notifications = protocol.getNotificationsFromServer();
-        if (socketListeners.size() > 0 && !notifications.equals("")){
-           for (int i = 0 ; i < socketListeners.size(); i++ ){
-                socketListeners.get(i).notifyClient(notifications);
+        if (getLivePortListeners().size() > 0 && !notifications.equals("")){
+           for (int i = 0 ; i < getLivePortListeners().size(); i++ ){
+                CESocketThread socketThread = (CESocketThread)getLivePortListeners().get(i);
+                socketThread.notifyClient(notifications);
            }
            protocol.clearNotifactionsFromServer(); 
         } 

@@ -34,8 +34,10 @@ public class CEModbusTCPMaster {
             if (Modbus.debug) System.out.println("Connected to " + addr.toString() + ":" + con.getPort());
             
         }catch (Exception ex){
+            System.out.println("Cannot connect to WAGO on " + addr.toString() + ":" + con.getPort() + ". System will exit.");
           ex.printStackTrace();
           con.close();
+          System.exit(-1);
         }
             
         

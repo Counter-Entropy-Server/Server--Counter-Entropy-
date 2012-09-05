@@ -47,7 +47,13 @@ public class CESlaveReader {
                 trans.setReconnecting(false);
                 
                 //3. Execute transation
-                trans.execute();
+                try{
+                  trans.execute();  
+                }
+                catch (Exception ex){
+                   System.out.println("WAGO was disconnected. System will exit.");
+                   System.exit(-1);
+                }
                 
                 //4. Get response
                 res01 = (ReadCoilsResponse) trans.getResponse();

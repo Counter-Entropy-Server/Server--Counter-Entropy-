@@ -19,25 +19,40 @@ import java.util.*;
  * @author nur
  */
 public class CEDatabaseComm {
-    
+    public boolean lastConnectionCheck = true;
     
     public CEDatabaseComm (){
         
+       
+    }
+    
+    private boolean isConnected()
+    {
         try{
             
             URL url = new URL("http://localhost:3000/");
 	    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            if (conn.getInputStream() != null)
-                System.out.println("Connected to database");
+            if (conn.getInputStream() != null){
+                if (lastConnectionCheck == false)
+                    System.out.println("Connected to database");
+                lastConnectionCheck = true;
+                return true;
+            }
             
         }catch (Exception ex){
-           System.err.println("ERR: Cannot connect to database");
-        }
+            if (lastConnectionCheck == true)
+                System.err.println("Cannot connect to database");
+            lastConnectionCheck = false;
+            return false;
+        } 
+        
+        return false;
     }
-    
-
 
     public  String sendPostRequest(String data) {
+        
+        if (isConnected() == false)
+            return null;
         
         //Build parameter string
         String res = "";
@@ -104,6 +119,9 @@ public class CEDatabaseComm {
 
     public String sendGetRequest(String data) {
         
+        if (isConnected() == false)
+            return null;
+        
         //Build parameter string
         String res = "";
         try {
@@ -136,7 +154,7 @@ public class CEDatabaseComm {
     
     //Fills device table with name and adress of each house device 
     //(if the device already exists nothing happens)
-    public void FillDevices(HashMap houseVariables){
+    public void fillWithDevices(HashMap houseVariables){
         
         CEHouseVariable v;
         
@@ -157,7 +175,7 @@ public class CEDatabaseComm {
                
     }
     
-    public void updateVariableByAddress(int addr, int state){
+    public void updateVariableByAddress(int state, int addr){
         
         String dbRequest;
         dbRequest = "/setDeviceStateByAddress?address="+addr+"&state="+state;

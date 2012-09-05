@@ -21,7 +21,7 @@ public class CESocketThread extends Thread {
     public Socket socket = null;
     private CEScoketsProtocol protocol = null;
     
-    private PrintWriter out = null;
+    public PrintWriter out = null;
     private BufferedReader in = null;
 
     public CESocketThread(Socket socket, CEScoketsProtocol protocol ) {
@@ -46,9 +46,21 @@ public class CESocketThread extends Thread {
                 if ((inputLine = in.readLine()) != null){         //client is sending data
                    outputLine = protocol.processInput(inputLine);   //get the server answer
                    out.println(outputLine);                         //send the server answer to client
-                } 
-                
+                }
+                else{
+                    break;
+                }
 	    }
+            
+            System.out.println("A client socket disconnected");
+            try {
+                    out.close(); 
+                    in.close();
+                    socket.close();
+                }
+            catch (IOException e) {
+                    e.printStackTrace();
+                }
 
 	}catch(SocketException ex){
             System.out.println("Closing client socket");

@@ -122,14 +122,14 @@ public class DITest {
        
         //4. Instantiate database communication object
         db = new CEDatabaseComm(); 
-        db.FillDevices(houseVariables); //fill devices table in database for once
+        db.fillWithDevices(houseVariables); //fill devices table in database for once
                
         //5. Instantiate slave (wago) reader and writer objects
         //SlaveReader r = new SlaveReader(con,houseVariables);
         //SlaveWriter w = new SlaveWriter(con,houseVariables);
                 
         //6. Open network sockets to communicate with other systems
-        socket = new CEServerSocket(socketPort,2); //can communicate with 2 clients on port socketPort 
+        socket = new CEServerSocket(socketPort);
         socket.setHouseReferance(house);
         (new Thread(socket)).start(); //timer on one thread and server socket on another. Each client socket has its own thread
         

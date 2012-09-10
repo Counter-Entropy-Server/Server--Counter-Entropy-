@@ -51,6 +51,8 @@ public class CEServerSocket implements Runnable{
 
             while (listening){
                 listener = new CESocketThread(serverSocket.accept(),protocol);
+                if (socketListeners.contains(listener))
+                    continue;
                 socketListeners.add(listener);
                 listener.start();
                 System.out.println("Number of port listeners: " + getLivePortListeners().size());
@@ -82,7 +84,7 @@ public class CEServerSocket implements Runnable{
         protocol.addNewNotification(v);
     }
     
-    public void notifyClients()
+    public synchronized void notifyClients()
     {
         String notifications = protocol.getNotificationsFromServer();
         if (getLivePortListeners().size() > 0 && !notifications.equals("")){

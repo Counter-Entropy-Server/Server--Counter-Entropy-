@@ -176,22 +176,8 @@ public class ReadSlaveTimerCall extends TimerTask {
             
             v.updated = false;
         }
-        
-        socket.getLivePortListeners();
-        //method one
-        //socket.notifyClients(); //if there are any
-        
-        //method two
-        /*
-        String notifications = socket.protocol.getNotificationsFromServer();
-        if (socket.getLivePortListeners().size() > 0 && !notifications.equals("")){
-           for (int i = 0 ; i < socket.getLivePortListeners().size(); i++ ){
-                //((CESocketThread)socket.getLivePortListeners().get(i)).out.print(notifications);
-           }
-           socket.protocol.clearNotifactionsFromServer(); 
-        }
-        * */
-       
+
+        socket.notifyClients(); //if there are any
     }
        
         

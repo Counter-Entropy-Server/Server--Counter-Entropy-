@@ -6,6 +6,8 @@ package de.rwthAachen.counterEntropy.server;
 
 import java.net.*;
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -86,9 +88,21 @@ public class CESocketThread extends Thread {
     }
     
     
-    public void notifyClient(String notifications){
-        //if (out != null && socket.isConnected())
-            //out.println(notifications); //send data from server to client    
+    public synchronized void  notifyClient(String notifications){
+        /*
+       PrintWriter out2; 
+        //DataOutputStream outToClient;
+        try {
+            out2 = new PrintWriter(socket.getOutputStream(), true);
+            if (out2 != null && socket.isConnected())
+                out2.println(notifications);
+                //outToClient = new DataOutputStream(socket.getOutputStream());
+                //outToClient.writeBytes(notifications);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        * 
+        */
     }
     
     

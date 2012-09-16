@@ -42,17 +42,35 @@ public class CESlaveWriter {
                 //if (Modbus.debug) System.out.println("Write coil request: " + req05.getHexMessage());
                 
                 //2. Prepare the transaction
-                trans = new ModbusTCPTransaction(con);
+                trans = new ModbusTCPTransaction(CEServer.master.con);
                 trans.setRequest(req05);
                 trans.setReconnecting(false);
                 
-                //3. Execute transation
-                trans.execute();
+              //3. Execute transation
+                try{
+                  trans.execute();  
+                }
+                catch (Exception a){
+                   System.out.println("WAGO was disconnected. Reconnecting ...");
+                   //CEServer.reconnectToWAGO();
+                   boolean connectionSucceeded = false;
+                    while (!connectionSucceeded)
+                    {
+                        try{
+                        if (CEServer.master.reconnect()){
+                            connectionSucceeded = true;
+                            return;
+                            //trans.execute();
+                        }
+                        }catch (Exception b){
+                            connectionSucceeded = false;
+                        }
+                    }
+                }
                 
                 //4. Get response
                 res05 = (WriteCoilResponse) trans.getResponse();
                 //if (Modbus.debug) System.out.println("Response (hex): " + res05.getHexMessage() );
-                
                 
                 //System.out.println("Coil Status (binary)=" + res05.getCoil());
                                    
@@ -73,12 +91,29 @@ public class CESlaveWriter {
                 //if (Modbus.debug) System.out.println("Write reg request: " + req06.getHexMessage());
                 
                 //2. Prepare the transaction
-                trans = new ModbusTCPTransaction(con);
+                trans = new ModbusTCPTransaction(CEServer.master.con);
                 trans.setRequest(req06);
                 trans.setReconnecting(false);
                 
                 //3. Execute transation
-                trans.execute();
+                try{
+                  trans.execute();  
+                }
+                catch (Exception a){
+                   System.out.println("WAGO was disconnected. Reconnecting ...");
+                   boolean connectionSucceeded = false;
+                    while (!connectionSucceeded)
+                    {
+                        try{
+                        if (CEServer.master.reconnect()){
+                            connectionSucceeded = true;
+                            return;
+                        }
+                        }catch (Exception b){
+                            connectionSucceeded = false;
+                        }
+                    }
+                }
                 
                 //4. Get response
                 res06 = (WriteSingleRegisterResponse) trans.getResponse();

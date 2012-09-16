@@ -42,7 +42,7 @@ public class CESlaveReader {
                 //if (Modbus.debug) System.out.println("Read coil request: " +  req01.getHexMessage());
                 
                 //2. Prepare the transaction
-                trans = new ModbusTCPTransaction(con);
+                trans = new ModbusTCPTransaction(CEServer.master.con);
                 trans.setRequest(req01);
                 trans.setReconnecting(false);
                 
@@ -50,9 +50,20 @@ public class CESlaveReader {
                 try{
                   trans.execute();  
                 }
-                catch (Exception ex){
-                   System.out.println("WAGO was disconnected. System will exit.");
-                   System.exit(-1);
+                catch (Exception a){
+                   System.out.println("WAGO was disconnected. Reconnecting ...");
+                   boolean connectionSucceeded = false;
+                    while (!connectionSucceeded)
+                    {
+                        try{
+                        if (CEServer.master.reconnect()){
+                            connectionSucceeded = true;
+                            return null;
+                        }
+                        }catch (Exception b){
+                            connectionSucceeded = false;
+                        }
+                    }
                 }
                 
                 //4. Get response
@@ -89,12 +100,29 @@ public class CESlaveReader {
                 //if (Modbus.debug) System.out.println("Read reg request: " + req03.getHexMessage());
                 
                 //2. Prepare the transaction
-                trans = new ModbusTCPTransaction(con);
+                trans = new ModbusTCPTransaction(CEServer.master.con);
                 trans.setRequest(req03);
                 trans.setReconnecting(false);
                 
                 //3. Execute transation
-                trans.execute();
+                try{
+                  trans.execute();  
+                }
+                catch (Exception a){
+                   System.out.println("WAGO was disconnected. Reconnecting ...");
+                   boolean connectionSucceeded = false;
+                    while (!connectionSucceeded)
+                    {
+                        try{
+                        if (CEServer.master.reconnect()){
+                            connectionSucceeded = true;
+                            return null;
+                        }
+                        }catch (Exception b){
+                            connectionSucceeded = false;
+                        }
+                    }
+                }
                 
                 //4. Get response
                 res03 = (ReadMultipleRegistersResponse) trans.getResponse();

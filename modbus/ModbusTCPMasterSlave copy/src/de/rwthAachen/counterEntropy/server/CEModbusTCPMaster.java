@@ -15,29 +15,34 @@ import net.wimpi.modbus.net.TCPMasterConnection;
  */
 public class CEModbusTCPMaster {
     
-    TCPMasterConnection con = null;
+    public TCPMasterConnection con = null;
     CESlaveReader reader = null;
     CESlaveWriter writer = null;
+    InetAddress a;
+    int p;
             
     public void CEModbusMaster()
     {
         
     }
         
-    public void connect(InetAddress addr, int port)
+    public boolean connect(InetAddress addr, int port)
     {
         try
         {
+            this.a = addr;
+            this.p = port;
             con = new TCPMasterConnection(addr);
             con.setPort(port);
             con.connect();
             if (Modbus.debug) System.out.println("Connected to " + addr.toString() + ":" + con.getPort());
-            
+            return true;
         }catch (Exception ex){
-            System.out.println("Cannot connect to WAGO on " + addr.toString() + ":" + con.getPort() + ". System will exit.");
-          ex.printStackTrace();
+           //System.out.println("Cannot connect to WAGO on " + addr.toString() + ":" + con.getPort() + ". System will exit.");
+          //ex.printStackTrace();
           con.close();
-          System.exit(-1);
+          return false;
+          //System.exit(-1);
         }
             
         
@@ -106,5 +111,9 @@ public class CEModbusTCPMaster {
         value = v.reverseFormatValue(value);
         if(v != null)
             write(v.modbusAddr,value,v.writeFunctionCall);
+    }
+
+    boolean reconnect() {
+        return this.connect(this.a, this.p);
     }
 }

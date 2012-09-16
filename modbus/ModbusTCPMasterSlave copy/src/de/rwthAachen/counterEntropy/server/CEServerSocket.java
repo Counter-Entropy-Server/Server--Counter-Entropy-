@@ -50,9 +50,7 @@ public class CEServerSocket implements Runnable{
             System.out.println("Server listening on port: " + port);
 
             while (listening){
-                listener = new CESocketThread(serverSocket.accept(),protocol);
-                if (socketListeners.contains(listener))
-                    continue;
+                listener = new CESocketThread(serverSocket.accept(),protocol); //unhandled problem: same client cam have more than one socket opened
                 socketListeners.add(listener);
                 listener.start();
                 System.out.println("Number of port listeners: " + getLivePortListeners().size());
@@ -86,11 +84,12 @@ public class CEServerSocket implements Runnable{
     
     public synchronized void notifyClients()
     {
+        int availableListeners = getLivePortListeners().size();
         String notifications = protocol.getNotificationsFromServer();
-        if (getLivePortListeners().size() > 0 && !notifications.equals("")){
-           for (int i = 0 ; i < getLivePortListeners().size(); i++ ){
-                CESocketThread socketThread = (CESocketThread)getLivePortListeners().get(i);
-                socketThread.notifyClient(notifications);
+        if (availableListeners > 0 && !notifications.equals("")){
+           for (int i = 0 ; i < availableListeners; i++ ){
+                //CESocketThread socketThread = (CESocketThread)getLivePortListeners().get(i);
+                //socketThread.notifyClient(notifications);
            }
            protocol.clearNotifactionsFromServer(); 
         } 

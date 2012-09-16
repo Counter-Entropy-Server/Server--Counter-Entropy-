@@ -80,6 +80,7 @@ import net.wimpi.modbus.util.*;
  */
 public class CEServer {
 
+    public static CEModbusTCPMaster master = null;    
     
   public static void main(String[] args) {
 
@@ -92,7 +93,6 @@ public class CEServer {
     String houseVariablesExcelFilePath = null;  //Path to read house variables xls file
 
     //Server controls
-    CEModbusTCPMaster master = null;
     CEHouse house = null;
     CEDatabaseComm db = null;
     CEServerSocket socket = null;
@@ -123,8 +123,11 @@ public class CEServer {
 
         //2. Open the connection
         master = new CEModbusTCPMaster();
-        master.connect(addr,modbusPort);
-
+        if (!master.connect(addr,modbusPort)){
+            System.out.println("Cannot connect to WAGO on " + addr.toString() + ":" + modbusPort + ". System will exit.");
+            System.exit(-1);
+        }
+        
         //3. Intitialize house with house variables
         house = new CEHouse();
         HashMap houseVariables = house.getHouseVariablesFromFile(houseVariablesExcelFilePath);
@@ -162,7 +165,6 @@ public class CEServer {
   private static void printUsage() {
     System.out.println("Counter Entropy Server: communicates house status with wago, database and clients");
   }
- 
 }
 
 

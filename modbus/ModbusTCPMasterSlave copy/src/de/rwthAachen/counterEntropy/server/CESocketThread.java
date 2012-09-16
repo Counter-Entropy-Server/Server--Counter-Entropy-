@@ -89,19 +89,19 @@ public class CESocketThread extends Thread {
     
     
     public synchronized void  notifyClient(String notifications){
+        
         /*
        PrintWriter out2; 
         //DataOutputStream outToClient;
         try {
             out2 = new PrintWriter(socket.getOutputStream(), true);
             if (out2 != null && socket.isConnected())
-                out2.println(notifications);
+                out2.println(notifications + "\n");
                 //outToClient = new DataOutputStream(socket.getOutputStream());
                 //outToClient.writeBytes(notifications);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        * 
         */
     }
     

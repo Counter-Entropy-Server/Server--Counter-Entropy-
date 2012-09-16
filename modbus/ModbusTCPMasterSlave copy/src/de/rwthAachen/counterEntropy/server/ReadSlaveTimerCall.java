@@ -96,14 +96,14 @@ public class ReadSlaveTimerCall extends TimerTask {
             if (newValue > v.maxValue || newValue < v.minValue) 
                 continue; //none valid value
             
-            if (v.value != newValue){ //check if variables were (updated)
+            //if (v.value != newValue){ //check if variables were (updated)
 
                 //reverse value format 
                 reverseFormattedValue = v.reverseFormatValue(newValue);
                 
                 //write to slave
                 master.write(v.modbusAddr,reverseFormattedValue,v.writeFunctionCall); 
-            }
+            //}
         }
         
         if (clientVariables.size() > 0){

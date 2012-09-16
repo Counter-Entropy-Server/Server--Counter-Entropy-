@@ -78,7 +78,7 @@ public class TCPMasterConnection {
   public synchronized void connect()
       throws Exception {
     if(!m_Connected) {
-      if(Modbus.debug) System.out.println("connect()");
+      //if(Modbus.debug) System.out.println("connect()");
       m_Socket = new Socket(m_Address, m_Port);
       setTimeout(m_Timeout);
       prepareTransport();
